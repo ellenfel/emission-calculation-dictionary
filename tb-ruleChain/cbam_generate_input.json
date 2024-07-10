@@ -1,0 +1,624 @@
+{
+  "ruleChain": {
+    "name": "CBAM-generate-input",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "additionalInfo": {
+      "description": ""
+    }
+  },
+  "metadata": {
+    "firstNodeIndex": null,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "active - emission",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "if(msg[\"Active Energy\"]){\n\tmsg.active = true;\n\n\t// Carbon intensity factor in kgCO2/kWh (example: coal = 0.9 kgCO2/kWh)\n    // carbonIntensityFactor = 0.9;\n\n\t// Active energy consumption assumed in kWh\n\n\t// Calculation of carbon intensity in kilograms of CO2 per kilowatt-hour (kgCO2/kWh)\n\n\tmsg.emission = msg[\"Active Energy\"] * 0.9;\n\tmsg.intensity = (msg[\"Active Energy\"] * 0.9) / msg[\"Active Energy\"];\n\n\t// Output the results\n\t//console.log(\"Carbon Emissions:\", carbonEmissions, \"kgCO2\");\n\t//console.log(\"Carbon Intensity:\", carbonIntensity, \"kgCO2/kWh\");\n\n\n\treturn {msg: msg, metadata: metadata, msgType: msgType};\n}\nelse{return {msg: msg, metadata: metadata, msgType: msgType};}",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 896,
+          "layoutY": 28
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "emission",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar msg = {\n    \"FNW1emission\": initialValue + Math.random() * increaseFactor,\n    \"FNW2emission\": initialValue + Math.random() * increaseFactor,\n    \"FNW3emission\": initialValue + Math.random() * increaseFactor,\n    \"FS1emission\": initialValue + Math.random() * increaseFactor,\n    \"FS2emission\": initialValue + Math.random() * increaseFactor,\n    \"FS3emission\": initialValue + Math.random() * increaseFactor,\n    \"FE1emission\": initialValue + Math.random() * increaseFactor,\n    \"FE2emission\": initialValue + Math.random() * increaseFactor,\n    \"FE3emission\": initialValue + Math.random() * increaseFactor,\n    \"FW1emission\": initialValue + Math.random() * increaseFactor,\n    \"FW2emission\": initialValue + Math.random() * increaseFactor,\n    \"FW3emission\": initialValue + Math.random() * increaseFactor,\n};\n\nreturn {\n    msg: msg,\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "4de07d10-f97d-11ee-ba81-4fe45718eabf",
+          "originatorType": "DEVICE"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 62,
+          "layoutY": 3440
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "save timeseries",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "defaultTTL": 0,
+          "skipLatestPersistence": false,
+          "useServerTs": false
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1216,
+          "layoutY": 959
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "West",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FW1emission\": initialValue*3 + Math.random() * increaseFactor,\n    \"FW2emission\": initialValue*3 + Math.random() * increaseFactor,\n    \"FW3emission\": initialValue*3 + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FW1gas\": Math.random() * 100,\n    \"FW2gas\": Math.random() * 100,\n    \"FW3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FW1water\": Math.random() * 1000,\n    \"FW2water\": Math.random() * 1000,\n    \"FW3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FW1energy\": Math.random() * 1000,\n    \"FW2energy\": Math.random() * 1000,\n    \"FW3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FW1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FW2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FW3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FW1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FW2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FW3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FW1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FW2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FW3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FW\" + floor + \"gas\"] + waterReading[\"FW\" + floor + \"water\"] + energyReading[\"FW\" + floor + \"energy\"];\n    totalBillPrice[\"FW\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "2b9f0ed0-f68d-11ee-ba81-4fe45718eabf",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 109,
+          "layoutY": 3111
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "north-west",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FNW1emission\": initialValue + Math.random() * increaseFactor,\n    \"FNW2emission\": initialValue + Math.random() * increaseFactor,\n    \"FNW3emission\": initialValue + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FNW1gas\": Math.random() * 100,\n    \"FNW2gas\": Math.random() * 100,\n    \"FNW3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FNW1water\": Math.random() * 1000,\n    \"FNW2water\": Math.random() * 1000,\n    \"FNW3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FNW1energy\": Math.random() * 1000,\n    \"FNW2energy\": Math.random() * 1000,\n    \"FNW3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FNW1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FNW2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FNW3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FNW1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FNW2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FNW3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FNW1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FNW2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FNW3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\n// Total bill price calculation\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FNW\" + floor + \"gas\"] + waterReading[\"FNW\" + floor + \"water\"] + energyReading[\"FNW\" + floor + \"energy\"];\n    totalBillPrice[\"FNW\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "93285760-f682-11ee-ba81-4fe45718eabf",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 140,
+          "layoutY": 3177
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "east",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FE1emission\": initialValue + Math.random() * increaseFactor,\n    \"FE2emission\": initialValue + Math.random() * increaseFactor,\n    \"FE3emission\": initialValue + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FE1gas\": Math.random() * 100,\n    \"FE2gas\": Math.random() * 100,\n    \"FE3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FE1water\": Math.random() * 1000,\n    \"FE2water\": Math.random() * 1000,\n    \"FE3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FE1energy\": Math.random() * 1000,\n    \"FE2energy\": Math.random() * 1000,\n    \"FE3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FE1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FE2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FE3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FE1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FE2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FE3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FE1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FE2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FE3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\n// Total bill price calculation\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FE\" + floor + \"gas\"] + waterReading[\"FE\" + floor + \"water\"] + energyReading[\"FE\" + floor + \"energy\"];\n    totalBillPrice[\"FE\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "08aab190-f68d-11ee-ba81-4fe45718eabf",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 170,
+          "layoutY": 3245
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "south",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FS1emission\": initialValue + Math.random() * increaseFactor,\n    \"FS2emission\": initialValue + Math.random() * increaseFactor,\n    \"FS3emission\": initialValue + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FS1gas\": Math.random() * 100,\n    \"FS2gas\": Math.random() * 100,\n    \"FS3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FS1water\": Math.random() * 1000,\n    \"FS2water\": Math.random() * 1000,\n    \"FS3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FS1energy\": Math.random() * 1000,\n    \"FS2energy\": Math.random() * 1000,\n    \"FS3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FS1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FS2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FS3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FS1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FS2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FS3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FS1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FS2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FS3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\n// Total bill price calculation\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FS\" + floor + \"gas\"] + waterReading[\"FS\" + floor + \"water\"] + energyReading[\"FS\" + floor + \"energy\"];\n    totalBillPrice[\"FS\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "1d8705b0-f687-11ee-ba81-4fe45718eabf",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 198,
+          "layoutY": 3308
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FS1emission+msg.FS2emission+msg.FS3emission;\nmsg.Gas=msg.FS3gas+msg.FS3gas+msg.FS3gas;\nmsg.Water=msg.FS1water+msg.FS2water+msg.FS3water;\nmsg.Energy=msg.FS1energy+msg.FS2energy+msg.FS3energy;\nmsg.Bill=msg.FS1totalBillPrice+msg.FS2totalBillPrice+msg.FS3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 539,
+          "layoutY": 3305
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FE1emission+msg.FE2emission+msg.FE3emission;\nmsg.Gas=msg.FE3gas+msg.FE3gas+msg.FE3gas;\nmsg.Water=msg.FE1water+msg.FE2water+msg.FE3water;\nmsg.Energy=msg.FE1energy+msg.FE2energy+msg.FE3energy;\nmsg.Bill=msg.FE1totalBillPrice+msg.FE2totalBillPrice+msg.FE3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 499,
+          "layoutY": 3243
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FNW1emission+msg.FNW2emission+msg.FNW3emission;\nmsg.Gas=msg.FNW3gas+msg.FNW3gas+msg.FNW3gas;\nmsg.Water=msg.FNW1water+msg.FNW2water+msg.FNW3water;\nmsg.Energy=msg.FNW1energy+msg.FNW2energy+msg.FNW3energy;\nmsg.Bill=msg.FNW1totalBillPrice+msg.FNW2totalBillPrice+msg.FNW3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 481,
+          "layoutY": 3178
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FW1emission+msg.FW2emission+msg.FW3emission;\nmsg.Gas=msg.FW3gas+msg.FW3gas+msg.FW3gas;\nmsg.Water=msg.FW1water+msg.FW2water+msg.FW3water;\nmsg.Energy=msg.FW1energy+msg.FW2energy+msg.FW3energy;\nmsg.Bill=msg.FW1totalBillPrice+msg.FW2totalBillPrice+msg.FW3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 438,
+          "layoutY": 3115
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
+        "name": "Message Type Switch",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "layoutX": 867,
+          "layoutY": 965
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.profile.TbDeviceProfileNode",
+        "name": "Device Profile Node",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "persistAlarmRulesState": false,
+          "fetchAlarmRulesStateOnStart": false
+        },
+        "additionalInfo": {
+          "description": "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
+          "layoutX": 605,
+          "layoutY": 1038
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.flow.TbCheckpointNode",
+        "name": "checkpoint",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "SequentialByOriginator",
+        "configurationVersion": 1,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 575,
+          "layoutY": 1149
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "entire factory",
+        "debugMode": true,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nfunction generateReadings(section) {\n    var carbonEmission = {};\n    var gasReading = {};\n    var waterReading = {};\n    var energyReading = {};\n    var scope1Emission = {};\n    var scope2Emission = {};\n    var scope3Emission = {};\n    var totalBillPrice = {};\n\n    var scope1Types = [\"StationaryCombustion\", \"MobileCombustion\", \"ProcessEmissions\", \"FugitiveEmissions\"];\n    var scope2Types = [\"ElectricityConsumption\", \"HeatingAndCooling\"];\n    var scope3Types = [\n        \"UpstreamEmissionPurchasedGoodsAndServices\",\n        \"UpstreamEmissionWasteGeneratedInOperations\",\n        \"UpstreamEmissionCapitalGoods\",\n        \"UpstreamEmissionFuelAndEnergyRelatedActivities\",\n        \"UpstreamEmissionTransportationAndDistribution\",\n        \"UpstreamEmissionWasteGeneratedInOperations\",\n        \"UpstreamEmissionBusinessTravel\",\n        \"UpstreamEmissionEmployeeCommuting\",\n        \"DownstreamEmissionsTransportationAndDistribution\",\n        \"DownstreamEmissionsProcessingOfSoldProducts\",\n        \"DownstreamEmissionsUseOfSoldProducts\",\n        \"DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts\",\n        \"DownstreamEmissionsFranchises\",\n        \"DownstreamEmissionsInvestments\"\n    ];\n\n    for (var floor = 1; floor <= 3; floor++) {\n        carbonEmission[section + floor + \"emission\"] = initialValue + Math.random() * increaseFactor;\n        gasReading[section + floor + \"gas\"] = Math.random() * 100;\n        waterReading[section + floor + \"water\"] = Math.random() * 1000;\n        energyReading[section + floor + \"energy\"] = Math.random() * 1000;\n\n        // Scope 1 emissions\n        scope1Types.forEach(function(type) {\n            scope1Emission[section + floor + \"scope1_\" + type] = initialValue + Math.random() * increaseFactor;\n        });\n\n        // Scope 2 emissions\n        scope2Types.forEach(function(type) {\n            scope2Emission[section + floor + \"scope2_\" + type] = initialValue + Math.random() * increaseFactor;\n        });\n\n        // Scope 3 emissions\n        scope3Types.forEach(function(type) {\n            scope3Emission[section + floor + \"scope3_\" + type] = initialValue + Math.random() * increaseFactor;\n        });\n\n        var total = gasReading[section + floor + \"gas\"] + waterReading[section + floor + \"water\"] + energyReading[section + floor + \"energy\"];\n        totalBillPrice[section + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n    }\n\n    return Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice);\n}\n\n// Generate readings for all sections\nvar northReadings = generateReadings(\"FN\");\nvar southReadings = generateReadings(\"FS\");\nvar eastReadings = generateReadings(\"FE\");\nvar westReadings = generateReadings(\"FW\");\n\nreturn {\n    msg: Object.assign({}, northReadings, southReadings, eastReadings, westReadings),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "2d552440-f682-11ee-ba81-4fe45718eabf",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 62,
+          "layoutY": 3055
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": true,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "// Calculate total emissions by type\nmsg.totalMobileEmission = msg.FN1scope1_MobileCombustion + msg.FN2scope1_MobileCombustion + msg.FN3scope1_MobileCombustion\n                         + msg.FS1scope1_MobileCombustion + msg.FS2scope1_MobileCombustion + msg.FS3scope1_MobileCombustion;\n\nmsg.totalStationaryEmission = msg.FN1scope1_StationaryCombustion + msg.FN2scope1_StationaryCombustion + msg.FN3scope1_StationaryCombustion\n                             + msg.FS1scope1_StationaryCombustion + msg.FS2scope1_StationaryCombustion + msg.FS3scope1_StationaryCombustion;\n\nmsg.totalProcessEmission = msg.FN1scope1_ProcessEmissions + msg.FN2scope1_ProcessEmissions + msg.FN3scope1_ProcessEmissions\n                          + msg.FS1scope1_ProcessEmissions + msg.FS2scope1_ProcessEmissions + msg.FS3scope1_ProcessEmissions;\n\nmsg.totalFugitiveEmission = msg.FN1scope1_FugitiveEmissions + msg.FN2scope1_FugitiveEmissions + msg.FN3scope1_FugitiveEmissions\n                           + msg.FS1scope1_FugitiveEmissions + msg.FS2scope1_FugitiveEmissions + msg.FS3scope1_FugitiveEmissions;\n\nmsg.totalElectricityConsumptionEmission = msg.FN1scope2_ElectricityConsumption + msg.FN2scope2_ElectricityConsumption + msg.FN3scope2_ElectricityConsumption\n                                         + msg.FS1scope2_ElectricityConsumption + msg.FS2scope2_ElectricityConsumption + msg.FS3scope2_ElectricityConsumption;\n\nmsg.totalHeatingAndCoolingEmission = msg.FN1scope2_HeatingAndCooling + msg.FN2scope2_HeatingAndCooling + msg.FN3scope2_HeatingAndCooling\n                                    + msg.FS1scope2_HeatingAndCooling + msg.FS2scope2_HeatingAndCooling + msg.FS3scope2_HeatingAndCooling;\n\nmsg.totalUpstreamEmission = msg.FN1scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FN2scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FN3scope3_UpstreamEmissionPurchasedGoodsAndServices\n                           + msg.FN1scope3_UpstreamEmissionCapitalGoods + msg.FN2scope3_UpstreamEmissionCapitalGoods + msg.FN3scope3_UpstreamEmissionCapitalGoods\n                           + msg.FN1scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FN2scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FN3scope3_UpstreamEmissionFuelAndEnergyRelatedActivities\n                           + msg.FN1scope3_UpstreamEmissionTransportationAndDistribution + msg.FN2scope3_UpstreamEmissionTransportationAndDistribution + msg.FN3scope3_UpstreamEmissionTransportationAndDistribution\n                           + msg.FN1scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FN2scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FN3scope3_UpstreamEmissionWasteGeneratedInOperations\n                           + msg.FN1scope3_UpstreamEmissionBusinessTravel + msg.FN2scope3_UpstreamEmissionBusinessTravel + msg.FN3scope3_UpstreamEmissionBusinessTravel\n                           + msg.FN1scope3_UpstreamEmissionEmployeeCommuting + msg.FN2scope3_UpstreamEmissionEmployeeCommuting + msg.FN3scope3_UpstreamEmissionEmployeeCommuting\n                           + msg.FS1scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FS2scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FS3scope3_UpstreamEmissionPurchasedGoodsAndServices\n                           + msg.FS1scope3_UpstreamEmissionCapitalGoods + msg.FS2scope3_UpstreamEmissionCapitalGoods + msg.FS3scope3_UpstreamEmissionCapitalGoods\n                           + msg.FS1scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FS2scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FS3scope3_UpstreamEmissionFuelAndEnergyRelatedActivities\n                           + msg.FS1scope3_UpstreamEmissionTransportationAndDistribution + msg.FS2scope3_UpstreamEmissionTransportationAndDistribution + msg.FS3scope3_UpstreamEmissionTransportationAndDistribution\n                           + msg.FS1scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FS2scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FS3scope3_UpstreamEmissionWasteGeneratedInOperations\n                           + msg.FS1scope3_UpstreamEmissionBusinessTravel + msg.FS2scope3_UpstreamEmissionBusinessTravel + msg.FS3scope3_UpstreamEmissionBusinessTravel\n                           + msg.FS1scope3_UpstreamEmissionEmployeeCommuting + msg.FS2scope3_UpstreamEmissionEmployeeCommuting + msg.FS3scope3_UpstreamEmissionEmployeeCommuting;\n\nmsg.totalDownstreamEmission = msg.FN1scope3_DownstreamEmissionsTransportationAndDistribution + msg.FN2scope3_DownstreamEmissionsTransportationAndDistribution + msg.FN3scope3_DownstreamEmissionsTransportationAndDistribution\n                             + msg.FN1scope3_DownstreamEmissionsProcessingOfSoldProducts + msg.FN2scope3_DownstreamEmissionsProcessingOfSoldProducts + msg.FN3scope3_DownstreamEmissionsProcessingOfSoldProducts\n                             + msg.FN1scope3_DownstreamEmissionsUseOfSoldProducts + msg.FN2scope3_DownstreamEmissionsUseOfSoldProducts + msg.FN3scope3_DownstreamEmissionsUseOfSoldProducts\n                             + msg.FN1scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts + msg.FN2scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts + msg.FN3scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts\n                             + msg.FN1scope3_DownstreamEmissionsFranchises + msg.FN2scope3_DownstreamEmissionsFranchises + msg.FN3scope3_DownstreamEmissionsFranchises\n                             + msg.FN1scope3_DownstreamEmissionsInvestments + msg.FN2scope3_DownstreamEmissionsInvestments + msg.FN3scope3_DownstreamEmissionsInvestments\n                             + msg.FS1scope3_DownstreamEmissionsTransportationAndDistribution + msg.FS2scope3_DownstreamEmissionsTransportationAndDistribution + msg.FS3scope3_DownstreamEmissionsTransportationAndDistribution\n                             + msg.FS1scope3_DownstreamEmissionsProcessingOfSoldProducts + msg.FS2scope3_DownstreamEmissionsProcessingOfSoldProducts + msg.FS3scope3_DownstreamEmissionsProcessingOfSoldProducts\n                             + msg.FS1scope3_DownstreamEmissionsUseOfSoldProducts + msg.FS2scope3_DownstreamEmissionsUseOfSoldProducts + msg.FS3scope3_DownstreamEmissionsUseOfSoldProducts\n                             + msg.FS1scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts + msg.FS2scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts + msg.FS3scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts\n                             + msg.FS1scope3_DownstreamEmissionsFranchises + msg.FS2scope3_DownstreamEmissionsFranchises + msg.FS3scope3_DownstreamEmissionsFranchises\n                             + msg.FS1scope3_DownstreamEmissionsInvestments + msg.FS2scope3_DownstreamEmissionsInvestments + msg.FS3scope3_DownstreamEmissionsInvestments;\n\nmsg.totalEmission = msg.totalMobileEmission + msg.totalStationaryEmission + msg.totalProcessEmission + msg.totalFugitiveEmission\n                   + msg.totalElectricityConsumptionEmission + msg.totalHeatingAndCoolingEmission\n                   + msg.totalUpstreamEmission + msg.totalDownstreamEmission;\n\n// Calculate total emissions by scope\nmsg.totalScope1Emission = msg.FN1scope1_StationaryCombustion + msg.FN1scope1_MobileCombustion + msg.FN1scope1_ProcessEmissions + msg.FN1scope1_FugitiveEmissions\n                        + msg.FS1scope1_StationaryCombustion + msg.FS1scope1_MobileCombustion + msg.FS1scope1_ProcessEmissions + msg.FS1scope1_FugitiveEmissions;\n\nmsg.totalScope2Emission = msg.FN1scope2_ElectricityConsumption + msg.FN1scope2_HeatingAndCooling\n                        + msg.FS1scope2_ElectricityConsumption + msg.FS1scope2_HeatingAndCooling;\n\nmsg.totalScope3UpstreamEmission = msg.FN1scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FN1scope3_UpstreamEmissionCapitalGoods\n                                 + msg.FN1scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FN1scope3_UpstreamEmissionTransportationAndDistribution\n                                 + msg.FN1scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FN1scope3_UpstreamEmissionBusinessTravel\n                                 + msg.FN1scope3_UpstreamEmissionEmployeeCommuting + msg.FN2scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FN2scope3_UpstreamEmissionCapitalGoods\n                                 + msg.FN2scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FN2scope3_UpstreamEmissionTransportationAndDistribution\n                                 + msg.FN2scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FN2scope3_UpstreamEmissionBusinessTravel\n                                 + msg.FN2scope3_UpstreamEmissionEmployeeCommuting + msg.FN3scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FN3scope3_UpstreamEmissionCapitalGoods\n                                 + msg.FN3scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FN3scope3_UpstreamEmissionTransportationAndDistribution\n                                 + msg.FN3scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FN3scope3_UpstreamEmissionBusinessTravel\n                                 + msg.FN3scope3_UpstreamEmissionEmployeeCommuting + msg.FS1scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FS1scope3_UpstreamEmissionCapitalGoods\n                                 + msg.FS1scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FS1scope3_UpstreamEmissionTransportationAndDistribution\n                                 + msg.FS1scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FS1scope3_UpstreamEmissionBusinessTravel\n                                 + msg.FS1scope3_UpstreamEmissionEmployeeCommuting + msg.FS2scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FS2scope3_UpstreamEmissionCapitalGoods\n                                 + msg.FS2scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FS2scope3_UpstreamEmissionTransportationAndDistribution\n                                 + msg.FS2scope3_UpstreamEmissionWasteGeneratedInOperations + msg.FS2scope3_UpstreamEmissionBusinessTravel\n                                 + msg.FS2scope3_UpstreamEmissionEmployeeCommuting + msg.FS3scope3_UpstreamEmissionPurchasedGoodsAndServices + msg.FS3scope3_UpstreamEmissionCapitalGoods\n                                 + msg.FS3scope3_UpstreamEmissionFuelAndEnergyRelatedActivities + msg.FS3scope3_UpstreamEmissionTransportationAndDistribution\n                                 + msg.FS3_UpstreamEmissionWasteGeneratedInOperations + msg.FS3scope3_UpstreamEmissionBusinessTravel\n                                 + msg.FS3scope3_UpstreamEmissionEmployeeCommuting;\n\nmsg.totalScope3DownstreamEmission = msg.FN1scope3_DownstreamEmissionsTransportationAndDistribution\n                                   + msg.FN1scope3_DownstreamEmissionsProcessingOfSoldProducts\n                                   + msg.FN1scope3_DownstreamEmissionsUseOfSoldProducts\n                                   + msg.FN1scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts\n                                   + msg.FN1scope3_DownstreamEmissionsFranchises\n                                   + msg.FN1scope3_DownstreamEmissionsInvestments\n                                   + msg.FS1scope3_DownstreamEmissionsTransportationAndDistribution\n                                   + msg.FS1scope3_DownstreamEmissionsProcessingOfSoldProducts\n                                   + msg.FS1scope3_DownstreamEmissionsUseOfSoldProducts\n                                   + msg.FS1scope3_DownstreamEmissionsEndOfLifeTreatmentOfSoldProducts\n                                   + msg.FS1scope3_DownstreamEmissionsFranchises\n                                   + msg.FS1scope3_DownstreamEmissionsInvestments;\n\nmsg.totalScope3Emission = msg.totalScope3UpstreamEmission + msg.totalScope3DownstreamEmission;\n\n// Calculate total emissions at different assets (e.g., West, North, South, East)\nmsg.West_Emission = msg.FW1emission + msg.FW2emission + msg.FW3emission;\nmsg.West_Gas = msg.FW1gas + msg.FW2gas + msg.FW3gas;\nmsg.West_Water = msg.FW1water + msg.FW2water + msg.FW3water;\nmsg.West_Energy = msg.FW1energy + msg.FW2energy + msg.FW3energy;\nmsg.West_Bill = msg.FW1totalBillPrice + msg.FW2totalBillPrice + msg.FW3totalBillPrice;\n\nmsg.North_Emission = msg.FN1emission + msg.FN2emission + msg.FN3emission;\nmsg.North_Gas = msg.FN1gas + msg.FN2gas + msg.FN3gas;\nmsg.North_Water = msg.FN1water + msg.FN2water + msg.FN3water;\nmsg.North_Energy = msg.FN1energy + msg.FN2energy + msg.FN3energy;\nmsg.North_Bill = msg.FN1totalBillPrice + msg.FN2totalBillPrice + msg.FN3totalBillPrice;\n\nmsg.South_Emission = msg.FS1emission + msg.FS2emission + msg.FS3emission;\nmsg.South_Gas = msg.FS1gas + msg.FS2gas + msg.FS3gas;\nmsg.South_Water = msg.FS1water + msg.FS2water + msg.FS3water;\nmsg.South_Energy = msg.FS1energy + msg.FS2energy + msg.FS3energy;\nmsg.South_Bill = msg.FS1totalBillPrice + msg.FS2totalBillPrice + msg.FS3totalBillPrice;\n\nmsg.East_Emission = msg.FE1emission + msg.FE2emission + msg.FE3emission;\nmsg.East_Gas = msg.FE1gas + msg.FE2gas + msg.FE3gas;\nmsg.East_Water = msg.FE1water + msg.FE2water + msg.FE3water;\nmsg.East_Energy = msg.FE1energy + msg.FE2energy + msg.FE3energy;\nmsg.East_Bill = msg.FE1totalBillPrice + msg.FE2totalBillPrice + msg.FE3totalBillPrice;\n\n// Add any additional calculations here as needed for your dashboard\n\n// Return the updated message\nreturn { msg: msg, metadata: metadata, msgType: msgType };\n",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 393,
+          "layoutY": 3053
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "Scope 1",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FNW1emission\": initialValue + Math.random() * increaseFactor,\n    \"FNW2emission\": initialValue + Math.random() * increaseFactor,\n    \"FNW3emission\": initialValue + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FNW1gas\": Math.random() * 100,\n    \"FNW2gas\": Math.random() * 100,\n    \"FNW3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FNW1water\": Math.random() * 1000,\n    \"FNW2water\": Math.random() * 1000,\n    \"FNW3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FNW1energy\": Math.random() * 1000,\n    \"FNW2energy\": Math.random() * 1000,\n    \"FNW3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FNW1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FNW2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FNW3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FNW1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FNW2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FNW3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FNW1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FNW2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FNW3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\n// Total bill price calculation\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FNW\" + floor + \"gas\"] + waterReading[\"FNW\" + floor + \"water\"] + energyReading[\"FNW\" + floor + \"energy\"];\n    totalBillPrice[\"FNW\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "9f057780-36b9-11ef-be26-a34187d795ac",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 275,
+          "layoutY": 3382
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "Scope 2",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FE1emission\": initialValue + Math.random() * increaseFactor,\n    \"FE2emission\": initialValue + Math.random() * increaseFactor,\n    \"FE3emission\": initialValue + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FE1gas\": Math.random() * 100,\n    \"FE2gas\": Math.random() * 100,\n    \"FE3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FE1water\": Math.random() * 1000,\n    \"FE2water\": Math.random() * 1000,\n    \"FE3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FE1energy\": Math.random() * 1000,\n    \"FE2energy\": Math.random() * 1000,\n    \"FE3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FE1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FE2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FE3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FE1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FE2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FE3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FE1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FE2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FE3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\n// Total bill price calculation\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FE\" + floor + \"gas\"] + waterReading[\"FE\" + floor + \"water\"] + energyReading[\"FE\" + floor + \"energy\"];\n    totalBillPrice[\"FE\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "a6405ba0-36b9-11ef-be26-a34187d795ac",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 305,
+          "layoutY": 3450
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "Scope 3",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 1,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 900,
+          "scriptLang": "JS",
+          "jsScript": "var initialValue = 50; // Initial low value\nvar increaseFactor = 10; // Factor by which the values increase\n\nvar carbonEmission = {\n    \"FS1emission\": initialValue + Math.random() * increaseFactor,\n    \"FS2emission\": initialValue + Math.random() * increaseFactor,\n    \"FS3emission\": initialValue + Math.random() * increaseFactor\n};\n\nvar gasReading = {\n    \"FS1gas\": Math.random() * 100,\n    \"FS2gas\": Math.random() * 100,\n    \"FS3gas\": Math.random() * 100\n};\n\nvar waterReading = {\n    \"FS1water\": Math.random() * 1000,\n    \"FS2water\": Math.random() * 1000,\n    \"FS3water\": Math.random() * 1000\n};\n\nvar energyReading = {\n    \"FS1energy\": Math.random() * 1000,\n    \"FS2energy\": Math.random() * 1000,\n    \"FS3energy\": Math.random() * 1000\n};\n\n// Adding scope emissions\nvar scope1Emission = {\n    \"FS1_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FS2_scope1\": initialValue + Math.random() * increaseFactor,\n    \"FS3_scope1\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope2Emission = {\n    \"FS1_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FS2_scope2\": initialValue + Math.random() * increaseFactor,\n    \"FS3_scope2\": initialValue + Math.random() * increaseFactor\n};\n\nvar scope3Emission = {\n    \"FS1_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FS2_scope3\": initialValue + Math.random() * increaseFactor,\n    \"FS3_scope3\": initialValue + Math.random() * increaseFactor\n};\n\n// Total bill price calculation\nvar totalBillPrice = {};\nfor (var floor = 1; floor <= 3; floor++) {\n    var total = gasReading[\"FS\" + floor + \"gas\"] + waterReading[\"FS\" + floor + \"water\"] + energyReading[\"FS\" + floor + \"energy\"];\n    totalBillPrice[\"FS\" + floor + \"totalBillPrice\"] = parseInt(total.toFixed(2)); // Convert to integer\n}\n\nreturn {\n    msg: Object.assign({}, carbonEmission, gasReading, waterReading, energyReading, scope1Emission, scope2Emission, scope3Emission, totalBillPrice),\n    metadata: {\n        deviceType: \"carbon_emission_simulator\"\n    },\n    msgType: \"POST_TELEMETRY_REQUEST\"\n};\n",
+          "tbelScript": null,
+          "originatorId": "ae6a0c90-36b9-11ef-be26-a34187d795ac",
+          "originatorType": "ASSET"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 333,
+          "layoutY": 3513
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FS1emission+msg.FS2emission+msg.FS3emission;\nmsg.Gas=msg.FS3gas+msg.FS3gas+msg.FS3gas;\nmsg.Water=msg.FS1water+msg.FS2water+msg.FS3water;\nmsg.Energy=msg.FS1energy+msg.FS2energy+msg.FS3energy;\nmsg.Bill=msg.FS1totalBillPrice+msg.FS2totalBillPrice+msg.FS3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 674,
+          "layoutY": 3510
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FE1emission+msg.FE2emission+msg.FE3emission;\nmsg.Gas=msg.FE3gas+msg.FE3gas+msg.FE3gas;\nmsg.Water=msg.FE1water+msg.FE2water+msg.FE3water;\nmsg.Energy=msg.FE1energy+msg.FE2energy+msg.FE3energy;\nmsg.Bill=msg.FE1totalBillPrice+msg.FE2totalBillPrice+msg.FE3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 634,
+          "layoutY": 3448
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "add zones",
+        "debugMode": true,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "msg.Emission=msg.FNW1emission+msg.FNW2emission+msg.FNW3emission;\nmsg.Gas=msg.FNW3gas+msg.FNW3gas+msg.FNW3gas;\nmsg.Water=msg.FNW1water+msg.FNW2water+msg.FNW3water;\nmsg.Energy=msg.FNW1energy+msg.FNW2energy+msg.FNW3energy;\nmsg.Bill=msg.FNW1totalBillPrice+msg.FNW2totalBillPrice+msg.FNW3totalBillPrice;\n\n\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 616,
+          "layoutY": 3383
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "save timeseries",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "defaultTTL": 0,
+          "skipLatestPersistence": false,
+          "useServerTs": false
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1613,
+          "layoutY": 3185
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
+        "name": "Message Type Switch",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1264,
+          "layoutY": 3191
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.profile.TbDeviceProfileNode",
+        "name": "Device Profile Node",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "persistAlarmRulesState": false,
+          "fetchAlarmRulesStateOnStart": false
+        },
+        "additionalInfo": {
+          "description": "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
+          "layoutX": 1002,
+          "layoutY": 3264
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.flow.TbCheckpointNode",
+        "name": "checkpoint",
+        "debugMode": false,
+        "singletonMode": false,
+        "queueName": "SequentialByOriginator",
+        "configurationVersion": 1,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 972,
+          "layoutY": 3375
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 3,
+        "toIndex": 10,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 9,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 7,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 8,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 10,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 11,
+        "toIndex": 2,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 12,
+        "toIndex": 11,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 13,
+        "toIndex": 12,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 14,
+        "toIndex": 15,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 15,
+        "toIndex": 13,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 16,
+        "toIndex": 21,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 17,
+        "toIndex": 20,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 18,
+        "toIndex": 19,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 19,
+        "toIndex": 25,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 20,
+        "toIndex": 25,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 21,
+        "toIndex": 25,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 23,
+        "toIndex": 22,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 24,
+        "toIndex": 23,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 25,
+        "toIndex": 24,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
